@@ -1,18 +1,38 @@
+package Editor;
+
 import Graphics.Window;
 
-public class EditorEngine {
+public class TextEngine {
+
+    public Window window;
+    public FileHandler fileHandler;
 
     public String currentFilePath;
     public String currentFolderPath;
 
-    public EditorEngine() {
-        Window window = new Window(this);
 
+
+    public TextEngine() {
+        window = new Window(this);
+
+        fileHandler = new FileHandler();
     }
 
     public void setCurrentFilePath(String path) {
         this.currentFilePath = path;
 
-        System.out.println(this.currentFilePath);
+        StringBuilder fileData = fileHandler.load(this.currentFilePath);
+
+        if(fileData.isEmpty()) {
+            window.showMessage("Empty File");
+            return;
+        }
+
+        renderTextData(fileData);
+
+    }
+
+    private void renderTextData(StringBuilder data) {
+        window.canvas.textData = data;
     }
 }
