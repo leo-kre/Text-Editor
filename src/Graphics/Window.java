@@ -19,9 +19,11 @@ public class Window extends JFrame {
 
     private boolean isFullscreen = false;
 
-    public Canvas canvas = new Canvas(screenSize, tilingManager);
+    public Canvas canvas;
 
     public TextEngine textEngine;
+
+    private String scrollDirection = "none";
 
     public Window(TextEngine textEngine) {
 
@@ -31,6 +33,9 @@ public class Window extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         this.setSize(screenSize);
+
+        canvas = new Canvas(screenSize, tilingManager, textEngine);
+
         this.add(canvas);
 
         this.addAltOptions();
@@ -90,7 +95,7 @@ public class Window extends JFrame {
         this.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-
+                System.out.println(e.getKeyChar());
             }
 
             @Override
@@ -98,12 +103,17 @@ public class Window extends JFrame {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_ESCAPE -> System.exit(0);
                     case KeyEvent.VK_F10 -> toggleFullscreen();
+                    case KeyEvent.VK_PAGE_UP -> scrollDirection = "up";
+                    case KeyEvent.VK_PAGE_DOWN -> scrollDirection = "down";
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_PAGE_UP -> scrollDirection = "none";
+                    case KeyEvent.VK_PAGE_DOWN -> scrollDirection = "none";
+                }
             }
         });
     }
@@ -155,9 +165,9 @@ public class Window extends JFrame {
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                canvas.scrollHeight -= e.getWheelRotation();
+                textEngine.scrollHeight += e.getWheelRotation() * textEngine.scrollSpeed;
 
-                if(canvas.scrollHeight < 0) canvas.scrollHeight = 0;
+                if(textEngine.scrollHeight < 0) textEngine.scrollHeight = 0;
             }
         });
     }
@@ -230,7 +240,6 @@ public class Window extends JFrame {
         }
     }
 
-
     private boolean doesMouseInteractWithTiling(Vec2D pos) {
         Tile tile = tilingManager.getFilePathTile();
 
@@ -244,5 +253,21 @@ public class Window extends JFrame {
         if(doesMouseInteractWithTiling(pos)) {
             this.setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
         } else this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    }
+
+    public void updateScrollingHeight() {
+
+        int weight = 0;
+        switch (scrollDirection) {
+            case "up" -> weight = textEngine.scrollSpeed;
+            case "down" -> weight = -textEngine.scrollSpeed;
+            case "none" -> weight = 0;
+        }
+
+        textEngine.scrollHeight += weight;
+
+        if(textEngine.scrollHeight < 0) textEngine.scrollHeight = 0;
+
+        if(textEngine.scrollHeight > canvas.fileContentHeight() - canvas.getHeight() + 150) textEngine.scrollHeight = canvas.fileContentHeight() - canvas.getHeight() + 150;
     }
 }

@@ -6,7 +6,7 @@ public class TilingManager {
 
     private Dimension screenSize;
 
-    public final int hitboxSize = 3;
+    public final int hitboxSize = 1;
 
     private Tile textEditorTile;
     private Tile filePathTile;
