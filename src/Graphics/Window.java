@@ -111,8 +111,7 @@ public class Window extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_PAGE_UP -> scrollDirection = "none";
-                    case KeyEvent.VK_PAGE_DOWN -> scrollDirection = "none";
+                    case KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN -> scrollDirection = "none";
                 }
             }
         });
@@ -165,7 +164,10 @@ public class Window extends JFrame {
         this.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                textEngine.scrollHeight += e.getWheelRotation() * textEngine.scrollSpeed;
+
+                if((textEngine.scrollHeight + e.getWheelRotation() * textEngine.scrollSpeed) < canvas.fileContentHeight() - canvas.getHeight() + 150) {
+                    textEngine.scrollHeight += e.getWheelRotation() * textEngine.scrollSpeed;
+                }
 
                 if(textEngine.scrollHeight < 0) textEngine.scrollHeight = 0;
             }
@@ -264,10 +266,12 @@ public class Window extends JFrame {
             case "none" -> weight = 0;
         }
 
-        textEngine.scrollHeight += weight;
+        //System.out.println(textEngine.scrollHeight + weight);
+
+        if((textEngine.scrollHeight + weight) < canvas.fileContentHeight() - canvas.getHeight() + 150) {
+            textEngine.scrollHeight += weight;
+        }
 
         if(textEngine.scrollHeight < 0) textEngine.scrollHeight = 0;
-
-        if(textEngine.scrollHeight > canvas.fileContentHeight() - canvas.getHeight() + 150) textEngine.scrollHeight = canvas.fileContentHeight() - canvas.getHeight() + 150;
     }
 }
