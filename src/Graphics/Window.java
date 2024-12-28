@@ -101,6 +101,7 @@ public class Window extends JFrame {
         this.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
+
                 textEngine.write(e.getKeyChar(), textEngine.cursorPosition.x, textEngine.cursorPosition.y);
             }
 
@@ -115,6 +116,10 @@ public class Window extends JFrame {
                     case KeyEvent.VK_DOWN -> updateCursorPosition("down");
                     case KeyEvent.VK_LEFT -> updateCursorPosition("left");
                     case KeyEvent.VK_RIGHT -> updateCursorPosition("right");
+                }
+
+                if(e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                    textEngine.remove(textEngine.cursorPosition.x, textEngine.cursorPosition.y);
                 }
             }
 

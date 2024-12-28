@@ -106,7 +106,7 @@ public class Canvas extends JPanel {
 
                     int w = stringWidth(g2d, editorFont, String.valueOf(textEngine.formattedData[line][textEngine.cursorPosition.x]));
 
-                    g2d.fillRect(X, lineY - textEngine.lineHeight, w, textEngine.lineHeight + 7);
+                    g2d.fillRect(X, lineY - textEngine.lineHeight, 2, textEngine.lineHeight + 7);
                 }
             }
 

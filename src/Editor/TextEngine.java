@@ -76,11 +76,11 @@ public class TextEngine {
 
     public void write(char character, int x, int y) {
 
-        char[][] arr2 = new char[formattedData.length][formattedData[y].length + 1];
+        char[][] arr2 = new char[formattedData.length][];
 
         for(int line = 0; line < formattedData.length; line++) {
             if(line == y) {
-                arr2[line] = insertChar(formattedData[line], character, x);;
+                arr2[line] = insertChar(formattedData[line], character, x);
             } else {
                 arr2[line] = formattedData[line];
             }
@@ -91,19 +91,26 @@ public class TextEngine {
         this.targetCursorXPosition = this.cursorPosition.x;
     }
 
-    public void remove(char character) {
+    public void remove(int x, int y) {
 
-        char[][] arr2 = new char[formattedData.length][formattedData[cursorPosition.y].length + 1];
+        System.out.println(this.selectedLineLength);
+
+        char[][] arr2 = new char[formattedData.length][];
 
         for(int line = 0; line < formattedData.length; line++) {
             if(line == this.cursorPosition.y) {
-                arr2[line] = insertChar(formattedData[line], character, this.cursorPosition.x);;
+                arr2[line] = removeChar(formattedData[line], x - 1);
             } else {
                 arr2[line] = formattedData[line];
             }
+
         }
 
+
+
         formattedData = arr2;
+        this.cursorPosition.x--;
+        this.targetCursorXPosition = this.cursorPosition.x;
     }
 
     private void renderTextData(StringBuilder data) {
@@ -125,6 +132,26 @@ public class TextEngine {
                 arr2[i] = arr[i];
             } else {
                 arr2[i + 1] = arr[i];
+            }
+        }
+
+        return arr2;
+    }
+
+    private char[] removeChar(char[] arr, int position) {
+        char[] arr2 = new char[arr.length - 1];
+
+        boolean removedChar = false;
+
+        for(int i = 0; i < arr.length - 1; i++) {
+           if(i == position) {
+               removedChar = true;
+           }
+
+            if(!removedChar) {
+                arr2[i] = arr[i];
+            } else {
+                arr2[i] = arr[i + 1];
             }
         }
 
