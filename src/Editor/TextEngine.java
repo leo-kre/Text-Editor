@@ -1,8 +1,12 @@
 package Editor;
 
 import Graphics.Window;
+import LayoutManagement.Vec2D;
 
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +15,8 @@ public class TextEngine {
 
     public Window window;
     public FileHandler fileHandler;
+
+    public char[][] formattedData;
 
     public String currentFilePath;
     public String currentFolderPath;
@@ -21,6 +27,12 @@ public class TextEngine {
     public int lineSpacing = 20;
     public final int scrollSpeed = 8;
     public final int outOfScreenRenderBuffer = 100;
+
+    public int fileLineLength;
+    public int selectedLineLength;
+
+    public Vec2D cursorPosition = new Vec2D(25, 3);
+    public int targetCursorXPosition = 25;
 
     public int scrollHeight = 0;
 
@@ -45,7 +57,7 @@ public class TextEngine {
     }
 
     private void update() {
-        window.updateScrollingHeight();
+        window.update();
     }
 
     public void setCurrentFilePath(String path) {
@@ -62,7 +74,76 @@ public class TextEngine {
 
     }
 
-    private void renderTextData(StringBuilder data) {
-        window.canvas.textData = data;
+    public void write(char character, int x, int y) {
+
+        char[][] arr2 = new char[formattedData.length][formattedData[y].length + 1];
+
+        for(int line = 0; line < formattedData.length; line++) {
+            if(line == y) {
+                arr2[line] = insertChar(formattedData[line], character, x);;
+            } else {
+                arr2[line] = formattedData[line];
+            }
+        }
+
+        formattedData = arr2;
+        this.cursorPosition.x++;
+        this.targetCursorXPosition = this.cursorPosition.x;
     }
+
+    public void remove(char character) {
+
+        char[][] arr2 = new char[formattedData.length][formattedData[cursorPosition.y].length + 1];
+
+        for(int line = 0; line < formattedData.length; line++) {
+            if(line == this.cursorPosition.y) {
+                arr2[line] = insertChar(formattedData[line], character, this.cursorPosition.x);;
+            } else {
+                arr2[line] = formattedData[line];
+            }
+        }
+
+        formattedData = arr2;
+    }
+
+    private void renderTextData(StringBuilder data) {
+        this.formattedData = splitLinesIntoCharArrays(data);
+    }
+
+    private char[] insertChar(char[] arr, char character, int position) {
+        char[] arr2 = new char[arr.length + 1];
+
+        boolean insertedChar = false;
+
+        for(int i = 0; i < arr.length; i++) {
+            if(i == position) {
+                arr2[i] = character;
+                insertedChar = true;
+            }
+
+            if(!insertedChar) {
+                arr2[i] = arr[i];
+            } else {
+                arr2[i + 1] = arr[i];
+            }
+        }
+
+        return arr2;
+    }
+
+    private static char[][] splitLinesIntoCharArrays(StringBuilder sb) {
+        // Convert StringBuilder to String and split by newlines
+        String[] lines = sb.toString().split("\n");
+
+        // Create a 2D array to hold the char arrays
+        char[][] result = new char[lines.length][];
+
+        // Convert each line to a char array and store it in the result
+        for (int i = 0; i < lines.length; i++) {
+            result[i] = lines[i].toCharArray();
+        }
+
+        return result;
+    }
+
 }

@@ -8,6 +8,7 @@ import LayoutManagement.Vec2D;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Objects;
 
 public class Window extends JFrame {
 
@@ -24,6 +25,7 @@ public class Window extends JFrame {
     public TextEngine textEngine;
 
     private String scrollDirection = "none";
+    private String cursorScrollState = "none";
 
     public Window(TextEngine textEngine) {
 
@@ -54,6 +56,10 @@ public class Window extends JFrame {
 
     private Dimension getScreenDimension() {
         return Toolkit.getDefaultToolkit().getScreenSize();
+    }
+
+    public void update() {
+        this.updateScrollingHeight();
     }
 
     private void addAltOptions() {
@@ -95,7 +101,7 @@ public class Window extends JFrame {
         this.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                System.out.println(e.getKeyChar());
+                textEngine.write(e.getKeyChar(), textEngine.cursorPosition.x, textEngine.cursorPosition.y);
             }
 
             @Override
@@ -105,13 +111,18 @@ public class Window extends JFrame {
                     case KeyEvent.VK_F10 -> toggleFullscreen();
                     case KeyEvent.VK_PAGE_UP -> scrollDirection = "up";
                     case KeyEvent.VK_PAGE_DOWN -> scrollDirection = "down";
+                    case KeyEvent.VK_UP -> updateCursorPosition("up");
+                    case KeyEvent.VK_DOWN -> updateCursorPosition("down");
+                    case KeyEvent.VK_LEFT -> updateCursorPosition("left");
+                    case KeyEvent.VK_RIGHT -> updateCursorPosition("right");
                 }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_PAGE_UP, KeyEvent.VK_PAGE_DOWN -> scrollDirection = "none";
+                    case KeyEvent.VK_PAGE_UP -> scrollDirection = "none";
+                    case KeyEvent.VK_PAGE_DOWN -> scrollDirection = "none";
                 }
             }
         });
@@ -263,7 +274,6 @@ public class Window extends JFrame {
         switch (scrollDirection) {
             case "up" -> weight = textEngine.scrollSpeed;
             case "down" -> weight = -textEngine.scrollSpeed;
-            case "none" -> weight = 0;
         }
 
         //System.out.println(textEngine.scrollHeight + weight);
@@ -273,5 +283,46 @@ public class Window extends JFrame {
         }
 
         if(textEngine.scrollHeight < 0) textEngine.scrollHeight = 0;
+    }
+
+    public void updateCursorPosition(String state) {
+
+        switch (state) {
+            case "up" -> {
+                if(textEngine.cursorPosition.y - 1 >= 0) {
+                    textEngine.cursorPosition.y -= 1;
+                }
+            }
+
+            case "down" -> {
+                if(textEngine.cursorPosition.y + 1 <= textEngine.fileLineLength - 1) {
+                    textEngine.cursorPosition.y += 1;
+                }
+            }
+
+            case "left" -> {
+                if(textEngine.targetCursorXPosition - 1 >= 0) {
+                    textEngine.targetCursorXPosition -= 1;
+                }
+
+                if(textEngine.targetCursorXPosition > textEngine.selectedLineLength - 1 && textEngine.selectedLineLength >= 2) textEngine.targetCursorXPosition = textEngine.selectedLineLength - 2;
+            }
+
+            case "right" -> {
+                if(textEngine.targetCursorXPosition + 1 <= textEngine.selectedLineLength - 1) {
+                    textEngine.targetCursorXPosition += 1;
+                }
+
+                if(textEngine.targetCursorXPosition > textEngine.selectedLineLength - 1  && textEngine.selectedLineLength >= 2) textEngine.targetCursorXPosition = textEngine.selectedLineLength - 2;
+            }
+        }
+
+        canvas.updateCurrentLineLength();
+
+        if(textEngine.targetCursorXPosition <= textEngine.selectedLineLength - 1) {
+            textEngine.cursorPosition.x = textEngine.targetCursorXPosition;
+        }
+
+        if(textEngine.cursorPosition.x > textEngine.selectedLineLength - 1 && textEngine.selectedLineLength > 0) textEngine.cursorPosition.x = textEngine.selectedLineLength - 1;
     }
 }
